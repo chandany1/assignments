@@ -43,7 +43,59 @@
   const bodyParser = require('body-parser');
   
   const app = express();
-  
+  let todos = [];
+
   app.use(bodyParser.json());
+
+  app.get("/todos",function (req,res){
+      res.send(todos)
+  })
+
+  app.post("/todos",function (req,res){
+    const title = req.body.title
+    const description = req.body.description
+    const todo = {
+      id : Math.floor(Math.random() * 1000000),
+      title : title,
+      description : description
+    }
+    todos.push(todo)
+    res.status(201).send(todo)
+  })
+
+  app.get("/todos/:id",function (req,res){
+    const todo = todos.find(item => item.id === parseInt(req.params.id));
+    if (!todo) {
+      res.status(404).json({message : "No todo found"})
+    } else {
+      res.json(todo);
+    }
+})
+
+  app.put("/todos/:id",function (req,res){
+    const index = todos.findIndex(item => item.id === parseInt(req.params.id));
+    if(index===-1){
+      res.status(404).json({message :"No todo found with given id"})
+    }else{
+      todos[index].title = req.body.title
+      todos[index].description = req.body.description
+      res.json(todos[index])
+    }
+
+  })
+
+  app.delete("/todos/:id",function (req,res){
+    const index = todos.findIndex(item => item.id === parseInt(req.params.id));
+    if(index===-1){
+      res.status(404).json({message :"No todo found with given id"})
+    }else{
+      todos.splice(index, 1);
+      res.status(200).json({message : "Todo deleted"})
+    }
+  })
+
+  app.use((req, res, next) => {
+    res.status(404).send()
+  })
   
   module.exports = app;
